@@ -31,7 +31,7 @@ Client-side business logic and data transactions. [Zustand](https://github.com/p
 
 ## Controller
 
-Server-side user or computer input handlers such as isomorphic route handlers and RPCs (built atop [Wisp](https://github.com/gleam-wisp/wisp) or [Plug](https://github.com/elixir-plug/plug)?). Could we use RSC for this or do we roll our own isomorphic rendering/RPC layer?
+Server-side user or computer input handlers such as isomorphic route handlers and RPCs (built atop [Wisp](https://github.com/gleam-wisp/wisp) or [Plug](https://github.com/elixir-plug/plug)?). (Could we use RSC for this or do we roll our own isomorphic rendering/RPC layer? Could GlowUp compile two servers—one in Bun for rendering views, one in Erlang for controllers + models?)
 
 # Middleware and sub-apps
 
@@ -77,4 +77,4 @@ Can also prompt for sub-apps and moves src and test into ./src/apps with a root 
 - **Scripts** An eventuality but not often in the first year.
 - **CSS Framework** CSS modules solve the 80/20 of problems with CSS. Some folks are so anal about the DRY principle that they think they need to do more to CSS. Good luck to them.
 - **Middlewares** There should be a middleware story that's compatible with the big players in Erlang/JS, but it shouldn't provide any OOTB middleware (except maybe what's used internally to do controllers and render views)
-- **Deployment story** Provide docs on how to deploy and ensure it's dead simple to deploy to Railway. We can provide some tools to "eject" parts of the app (e.g. compile the view layer to a static site, or provide a model API fleixible enough to use with Snowflake and compile to Cloudflare Workers) but we won't build in any first-class support for this. Some folks think they need to export a full single page static app to the edge and run all their code on serverless lambdas. Good luck to them.
+- **Deployment story** Provide docs on how to deploy and ensure it's dead simple to deploy to Railway. We can provide some tools to "eject" parts of the app (e.g. compile the view layer to a static site, or provide a model API flexible enough to use with Snowflake and compile to Cloudflare Workers) but we won't build in any first-class support for this. Some folks think they need to export a full single page static app to the edge and run all their code on serverless lambdas. Good luck to them.
