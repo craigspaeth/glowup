@@ -71,7 +71,7 @@ Can also prompt for sub-apps and moves src and test into ./src/apps with a root 
 - **Pub/Sub** Some apps need to be real-time and provide a story around channels, SSE/WebSockets, etc.
 - **Native mobile/desktop story** React Native or another [native](https://github.com/elixir-desktop/desktop) tool for the poor orgs that can't get away with PWAs.
 - **Live View/HTMX** Some folks are convinced they don't need to write code for the browser. Good luck to them.
-- **Analytical data plane** Some enterprisey co's need to give a big ol' sandbox for SQL slingers. Could be neat to build on GlowUp's model to allow things like running dbt code.
+- **Analytical data plane** Some enterprisey co's need to give a big ol' sandbox for SQL slingers. Could be neat to build on GlowUp's model to allow integrating a data warehouse or running dbt code.
 - **e2e tests/observability** An eventuality but not often in the first year.
 - **GraphQL/APIs** Some orgs think they're the next Netflix. Good luck to them.
 - **Scripts** An eventuality but not often in the first year.
