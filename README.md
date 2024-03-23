@@ -121,7 +121,7 @@ fn add_todo(todo: Todo) {
   [..todos, todo]
 }
 
-fn todos(model) {
+pub fn main(model) {
   let (todos, set_todos): State(Todos) = use_state(
     Todos([Todo(title: "Groceries", body: "Buy milk", is_done: False)])
   ) 
@@ -202,7 +202,7 @@ pub fn todo_label(todo: Todo) {
 ```gleam
 import view_models/todos.{Todo,Todos}
 
-fn todos() {
+pub fn main() {
   let store = todos.use_store()
   div([], [
     ul([], [
@@ -222,11 +222,13 @@ fn todos() {
 
 ## Controllers
 
-- Server actions
+- Server action RPCs
+- Route handlers that can render views
 
 ```gleam
 import twinkle/controller.{Ctx}
 import models/todo
+import views/todo_list
 
 pub fn add_todo(input: Todo) {
   todo.save(input)
@@ -234,9 +236,24 @@ pub fn add_todo(input: Todo) {
 
 fn get_todos(ctx: Ctx) {
   todo.find_all(ctx.req.query.list_id)
+  ctx.render(todo_list.main)
 }
 
 pub const routes = (
   ("GET", "/todos", [get_todos])
 )
+```
+
+## Apps
+
+- Compose controllers together into a web server
+
+```gleam
+import twinkle/app
+import controllers/todos_controller
+import gleam/http/cowboy
+
+let service = app.use([todos_controller.routes])
+
+cowboy.start(service, on_port: 3000)
 ```
