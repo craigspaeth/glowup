@@ -4,7 +4,7 @@ A WIP full-stack gleam lang framework.
 
 # Principles
 
-- **Twinkle believes in science.** If there isn't research using the scientific method to prove something's effectiveness, then it's not worth the DX cost. 
+- **We believe in science.** If there isn't research using the scientific method to prove something's effectiveness, then it's not worth the DX cost. 
 - **The testing pyramid is great therefore pure functions are great.** [TDD](https://www.researchgate.net/publication/3249271_Guest_Editors'_Introduction_TDD--The_Art_of_Fearless_Programming) is one of the few scientifically proven ways to reduce a large amount of bugs so it's worth the DX cost. Functions that [compose](https://redux.js.org/api/compose/) or [flow](https://lodash.com/docs/4.17.15#flow) together with a [ctx](https://github.com/gleam-wisp/wisp?tab=readme-ov-file#handlers) record are awesome. They're simple to break up control flow into pure functions that are easy to unit test and apply TDD.
 - **Static types are for DX not correctness.** [The research](https://danluu.com/empirical-pl/) on static types shows that it only reduces _production_ bugs by at most 15% and most likely 2–5% (there's no evidence backing [the AirBnB claim](https://www.reddit.com/r/typescript/comments/aofcik/38_of_bugs_at_airbnb_could_have_been_prevented_by/) yet). Therefore static types are primarily useful as a DX tool (intellisense, documentation, etc.) and as such, it shouldn't get in the way of DX and it's okay to do some hacky things to get static types to work.
 - **Stand on the shoulders of giants.** Gleam has the potential to build a large adoption. It intends to be simple instead of clever. It embraces javascript instead of belittling it. It has a pragmatic vibe that doesn't throw the baby out with the bathwater. Let's help Gleam become more popular by embracing popular patterns and libraries from the Erlang/JS ecosystem like Cowboy and React instead of re-inventing the wheel as long as they don't get too in the way of Twinkle's principles. It's APIs should be familiar to users of the giant.
@@ -63,9 +63,9 @@ Scaffolds a hello world app with:
  
 Can also prompt for sub-apps and moves src and test into ./src/apps with a root lib directory holding a ./lib/design_system/button/button.gleam.
 
-# Out of scope stuff I've used
+# Out of scope stuff we've used
 
-80% of web apps need to talk to some kind of a database, organize testable business logic, render HTML on the server and in the browser, manage state in the browser, and handle inputs. Twinkle shouldn't solve for the other 20% of needs (some listed below) but it could be an umbrella org for other standalone libraries (with cute variations on a theme names like glowup/lipstick for a CSS framework).
+80% of web apps need to talk to some kind of a database, organize testable business logic, render HTML on the server and in the browser, manage state in the browser, and handle inputs. Twinkle shouldn't solve for the other 20% of needs (some listed below) but it could be an umbrella org for other standalone libraries.
 
 - **Jobs** An eventuality but not often in the first year.
 - **Pub/Sub** Some apps need to be real-time and provide a story around channels, SSE/WebSockets, etc.
@@ -85,7 +85,17 @@ Let's get to an MVP quick. This'll lock in an API and DX that we can refactor be
 
 ## Models
 
-TKTK
+```gleam
+import twinkle/model.{db}
+
+pub fn add_todo(input: Todo) {
+  let rows: List(Todo) = db.sql("insert into \"Todo\" values (?)", input.body)
+}
+
+pub fn find_all() {
+  let rows: List(Todo) = db.sql("select * from \"Todo\"")
+}
+```
 
 ## Views
 
@@ -95,7 +105,7 @@ TKTK
 - Inline CSS only for now
 
 ```gleam
-import twinkle/.{use_state, div, ul, li, p, button, on_click, style, State}
+import twinkle/.{use_state, div, ul, li, p, button, on_click, style}
 
 pub type Todo {
   body: String
@@ -131,8 +141,102 @@ fn todos(model) {
 
 ## View Models
 
-TKTK
+- Compiles to Zustand with [React Tracked](https://github.com/dai-shi/react-tracked)
+- Reducer/selector/flow/ctx utilities
+
+```gleam
+import controllers/todo_controller
+
+type Ctx(
+  state: State
+)
+
+type State(
+  todos: List(Todo)
+  is_saving: Bool
+)
+
+type Todo(
+  body: String
+  title: String
+  is_done: Bool
+)
+
+fn add_todo(ctx: Ctx, todo: Todo) {
+  todo_controller.add_todo(todo)
+  Ctx(
+    ..ctx
+    state: [..ctx.state.todos, todo]
+  )
+}
+
+fn init() {
+    Ctx(
+      state: State(
+        todos: [
+          Todo(title: "Groceries", body: "Buy milk", is_done: False)
+        ],
+        is_saving: false
+      )
+    )
+}
+
+fn total_todos(ctx: Ctx) {
+  list.length(ctx.state.todos)
+}
+
+pub use_store = view_model(
+  init,
+  reducers: [add_todo],
+  selectors: [total_todos]
+)
+
+pub fn todo_label(todo: Todo) {
+  todo.title <> " - " <> todo.body <> case todo.is_done {
+    True -> "✅"
+    False -> "❌"
+  }
+}
+```
+
+```gleam
+import view_models/todos.{Todo,Todos}
+
+fn todos() {
+  let store = todos.use_store()
+  div([], [
+    ul([], [
+      div([], "Total todos: " <> store.total_todos()),
+      store.todos.map(fn(todo) {
+        li([], [
+          store.todos.list_label(todo),
+          button([on_click(fn (e) {
+            store.add_todo(Todo(title: "Groceries", body: "Buy milk"))
+          })], ["Add"])
+        ])
+      })
+    ])
+  ])
+}
+```
 
 ## Controllers
 
-TKTK
+- Server actions
+
+```gleam
+import twinkle/controller.{Ctx}
+import models/todo
+
+pub fn add_todo(input: Todo) {
+  todo.save(input)
+}
+
+fn get_todos(ctx: Ctx) {
+  todo.find_all(ctx.req.query.list_id)
+}
+
+pub const routes = (
+  ("GET", "/todos", [get_todos])
+)
+```
